@@ -41,10 +41,12 @@ pprint(entrez_to_gene_list)
 
 client["test-db-1"]["entrez-to-gene"].insert_many(entrez_to_gene_list)
 
-x = client["test-db-1"]["entrez-to-gene"].find()
 
 
 def entrez_to_gene(df, entrez_id):
+    """
+    entrez-to-gene mapping function
+    """
     result = client["test-db-1"]["entrez-to-gene"].find_one({"entrez_code":entrez_id})
     return result["gene_symbol"]
     
