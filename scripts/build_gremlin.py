@@ -6,6 +6,11 @@ import asyncio
 import time
 import pandas as pd
 
+from src import clear_database
+from src import add_edge
+from src import add_gene_vertice
+
+
 dotenv.load_dotenv()
 
 GREMLIN_URI = os.getenv("GREMLIN_URI")
@@ -17,49 +22,27 @@ if sys.platform == "win32":
 
 local_client = client.Client(GREMLIN_URI, "g", username=GREMLIN_USER, password=GREMLIN_PASSWORD, message_serializer=serializer.GraphSONSerializersV2d0())
 
-_DROP_DATABASE = "g.V().drop()"
-
-def clear_database(local_client):
-    local_client.submitAsync(_DROP_DATABASE)
-
-def add_gene_vertice(local_client, gene_name):
-    print(gene_name)
-    _COMMAND = f"g.addV('gene').property('id', '{gene_name}').property('name', '{gene_name}').property('entity_type', 'gene').property('pk', 'pk')"
-    local_client.submitAsync(_COMMAND)
-
-def add_condition_vertice(local_client, condition_name):
-    _COMMAND = f"g.addV('condition').property('id', '{condition_name}').property('name', '{condition_name}').property('entity_type', 'condition').property('pk', 'pk')"
-    local_client.submitAsync(_COMMAND)
-
-def add_drug_vertice():
-    pass
-
-
-def add_edge(local_client, parent, child):
-    _COMMAND = f"g.V('{parent}').addE('links').to(g.V('{child}'))"
-    local_client.submitAsync(_COMMAND)
-
-"""
-Rebuilt TRRUST Database on Gremlin
-"""
-
 TRRUST_FILEPATH = "static/data/v1/trrust_rawdata.human.tsv"
 
 trrust_df = pd.read_csv(TRRUST_FILEPATH, delimiter="\t", header=None)
 trrust_df.columns = ["TF", "TARGET", "RELATIONSHIP", "PUBMED_ID"]
 print(trrust_df.head())
 
-clear_database(local_client)
+try:
+    already_added_names = set()
 
-already_added_names = set()
+    clear_database.clear_database(local_client)
+    for index, row in trrust_df.iterrows():
+        if index < 20:
+            if row["TF"] ont in already_added_names:
+                add_gene_vertice(local_client, row["TF"])
+                already_added_names.add(row["TF"])
+            if row["TARGET"] not in already_added_names:
+                add_gene_vertice(local_client, row["TARGET"])
+                already_added_names.add(row["TARGET"])
+            add_edge(local_client, row["TF"], row["TARGET"])
+    clear_database.clear_database(local_client)
+except:
+    print("skipped futures shutdown error")
 
-for index, row in trrust_df.iterrows():
-    if True:
-        print(row["TF"], row["TARGET"])
-        if row["TF"] not in already_added_names:
-            add_gene_vertice(local_client, row["TF"])
-            already_added_names.add(row["TF"])
-        if row["TARGET"] not in already_added_names:
-            add_gene_vertice(local_client, row["TARGET"])
-            already_added_names.add(row["TARGET"])
-        add_edge(local_client, row["TF"], row["TARGET"])
+print("going on here")
