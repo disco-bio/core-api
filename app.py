@@ -6,6 +6,7 @@ import uvicorn
 
 from src import gremlin_list_conditions
 from src import add_blank_vertice
+from src import traverse_from_condition_until_drug
 
 import dotenv
 import asyncio
@@ -34,7 +35,7 @@ async def home():
     data = {"data": "Disco API"}
     return JSONResponse(data)
 
-@app.get("/get_list_conditions")
+@app.get("/api/v0/get_list_conditions")
 def get_list_conditions():
     return_data = {"data": []}
 
@@ -44,6 +45,17 @@ def get_list_conditions():
     for item in callback.result().all().result():
         return_data["data"].append(item["objects"][0]["id"])
 
+
+    return return_data
+
+@app.get("/api/v0/get_treatment_for")
+def get_treatment_for(q: str = None):
+    return_data = {"data": []}
+
+    callback = traverse_from_condition_until_drug.traverse_from_condition_until_drug(local_client, q)
+    _ = add_blank_vertice.add_blank_vertice(local_client)
+
+    return_data["data"] = str(callback.result().all().result())
 
     return return_data
 
