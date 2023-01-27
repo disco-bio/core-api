@@ -10,11 +10,11 @@
 <body>
 
 		<h1>Disco</h1>
-		<h3>A Drug Discovery Platform</h3>
+		<h3 id="subtitle"></h3>
 
 
 		<input type="text" name="searchTerm" id="searchTerm">
-		<button id="searchButton">Search</button>
+		<button id="searchButton"></button>
 
 
 		<script type="text/javascript">
@@ -22,11 +22,24 @@
 			// 	window.location.href("https://www.google.com");
 			// }
 
+			const language_to = '{{lang}}';
+
+			console.log(language_to);
+
+
+			$.get("/api/v0/homepage_content?lang="+language_to,
+				function(data) {
+					document.getElementById("subtitle").innerHTML = data.subtitle;
+					document.getElementById("searchButton").innerHTML = data.search_button;
+				}
+			);
+
 			$('#searchButton').click(function(){
 				let searchTerm = document.getElementById("searchTerm").value;
-			   window.location.href='/api/v0/get_treatment_for?q='+searchTerm;
+			   window.location.href='/api/v0/get_treatment_for?q='+searchTerm+'&lang='+language_to;
 			   // console.log("clicked!")
-			})
+			});				
+			
 
 		</script>
 

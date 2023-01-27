@@ -8,13 +8,16 @@
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	</head>
 	<body>
-		<h1>Search Results</h1>
+		<h1 id="title"></h1>
 
 		<div id="resultsSection">
 		</div>
 
 		<script type="text/javascript">
-			let qTerm = "{{q}}";
+			const qTerm = "{{q}}";
+			const lang_to = "{{lang}}";
+
+
 			console.log(qTerm);
 			$.get('/api/v0/get_data_for?q='+qTerm,
 					function (data) {
@@ -25,6 +28,13 @@
 						}
 					}
 				)
+
+			$.get("/api/v0/results_content?lang="+lang_to,
+				function(data) {
+					document.getElementById("title").innerHTML = data.title;
+					// document.getElementById("searchButton").innerHTML = data.search_button;
+				}
+			);
 
 			function generateCard(drugName, pubmedUrl) {
 					htmlString = `<div class="card">

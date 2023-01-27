@@ -10,6 +10,7 @@ import uvicorn
 from src import gremlin_list_conditions
 from src import add_blank_vertice
 from src import traverse_from_condition_until_drug
+from src import translate
 
 import dotenv
 import asyncio
@@ -38,10 +39,48 @@ templates = Jinja2Templates(directory="templates")
 
 
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request):
+def home(request: Request, lang: str=None):
     data = {"data": "Disco API"}
-    return templates.TemplateResponse("home.html", {"request": request, "title": "Title"})
-    # return JSONResponse(data)
+    if lang is None:
+        return templates.TemplateResponse("home.html", {"request": request, "lang": "en"})
+    else:
+        return templates.TemplateResponse("home.html", {"request": request, "lang": lang})
+
+
+@app.get("/api/v0/homepage_content")
+def api_homepage_content(request: Request, lang: str=None):
+
+    content_dict = {
+            "subtitle": "A Drug Discovery Platform",
+            "search_button": "Search"
+        }
+
+
+    if lang is not None or lang!="en":
+        for key_ in content_dict.keys():
+            content_dict[key_] = translate.translate(
+                text=content_dict[key_],
+                language_to=lang)[0]["translations"][0]["text"]
+
+    return JSONResponse(content_dict)
+
+
+@app.get("/api/v0/results_content")
+def api_results_content(request: Request, lang: str=None):
+
+    content_dict = {
+            "title": "Search Results"
+        }
+
+
+    if lang is not None or lang!="en":
+        for key_ in content_dict.keys():
+            content_dict[key_] = translate.translate(
+                text=content_dict[key_],
+                language_to=lang)[0]["translations"][0]["text"]
+
+    return JSONResponse(content_dict)
+
 
 @app.get("/api/v0/get_list_conditions")
 def get_list_conditions():
@@ -53,20 +92,13 @@ def get_list_conditions():
     for item in callback.result().all().result():
         return_data["data"].append(item["objects"][0]["id"])
 
-
     return return_data
 
+
 @app.get("/api/v0/get_treatment_for", response_class=HTMLResponse)
-def get_treatment_for(request: Request, q: str = None):
-    # return_data = {"data": []}
+def get_treatment_for(request: Request, q: str = None, lang: str=None):
 
-    # callback = traverse_from_condition_until_drug.traverse_from_condition_until_drug(local_client, q)
-    # _ = add_blank_vertice.add_blank_vertice(local_client)
-
-    # for item in callback.result().all().result():
-    #     return_data["data"].append(item["id"])
-
-    return templates.TemplateResponse("response.html", {"request": request, "q": q})
+    return templates.TemplateResponse("response.html", {"request": request, "q": q, "lang": lang})
 
 
 @app.get("/api/v0/get_data_for")
@@ -92,11 +124,6 @@ def get_data_for(q: str = None):
 
     return JSONResponse(return_data)
 
-
-@app.get("/test/translate")
-def test_translate():
-
-    
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
