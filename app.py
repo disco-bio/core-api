@@ -93,5 +93,10 @@ def get_data_for(q: str = None):
     return JSONResponse(return_data)
 
 
+@app.get("/test/translate")
+def test_translate():
+
+    
+
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8080)
