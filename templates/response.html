@@ -10,7 +10,31 @@
 	<body>
 		<h1>Search Results</h1>
 
-		{{data}}
+		<div id="resultsSection">
+		</div>
+
+		<script type="text/javascript">
+			let qTerm = "{{q}}";
+			console.log(qTerm);
+			$.get('/api/v0/get_data_for?q='+qTerm,
+					function (data) {
+						for (let i=0; i < data.data.length; i++) {
+							console.log(data.data[i]);
+							const htmlContent = generateCard(data.data[i].drugName, data.data[i].pubmedUrl);
+							document.getElementById("resultsSection").innerHTML += htmlContent;
+						}
+					}
+				)
+
+			function generateCard(drugName, pubmedUrl) {
+					htmlString = `<div class="card">
+						<h5>${drugName}<h5>
+						<a href="${pubmedUrl}">PubMed</a>
+					</div><br><br>`;
+					return htmlString;
+			}
+
+		</script>
 
 	</body>
 </html>

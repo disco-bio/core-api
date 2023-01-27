@@ -58,17 +58,39 @@ def get_list_conditions():
 
 @app.get("/api/v0/get_treatment_for", response_class=HTMLResponse)
 def get_treatment_for(request: Request, q: str = None):
+    # return_data = {"data": []}
+
+    # callback = traverse_from_condition_until_drug.traverse_from_condition_until_drug(local_client, q)
+    # _ = add_blank_vertice.add_blank_vertice(local_client)
+
+    # for item in callback.result().all().result():
+    #     return_data["data"].append(item["id"])
+
+    return templates.TemplateResponse("response.html", {"request": request, "q": q})
+
+
+@app.get("/api/v0/get_data_for")
+def get_data_for(q: str = None):
     return_data = {"data": []}
+
 
     callback = traverse_from_condition_until_drug.traverse_from_condition_until_drug(local_client, q)
     _ = add_blank_vertice.add_blank_vertice(local_client)
 
     for item in callback.result().all().result():
-        return_data["data"].append(item["id"])
 
-    # return return_data
+        sub_dict = {
+                "drugName": None,
+                "pubmedUrl": None,
+            }
 
-    return templates.TemplateResponse("response.html", {"request": request, "data": return_data})
+        sub_dict["drugName"] = item["id"]
+        sub_dict["pubmedUrl"] = f"https://pubmed.ncbi.nlm.nih.gov/?term={item['id']}"
+
+        return_data["data"].append(sub_dict)
+
+
+    return JSONResponse(return_data)
 
 
 if __name__ == "__main__":
