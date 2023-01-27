@@ -1,7 +1,10 @@
 from gremlin_python.driver import client, serializer
 
 from fastapi import FastAPI, Request, WebSocket
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+
 import uvicorn
 
 from src import gremlin_list_conditions
@@ -30,10 +33,15 @@ local_client = client.Client(GREMLIN_URI, "g", username=GREMLIN_USER, password=G
 
 app = FastAPI()
 
-@app.get("/")
-async def home():
+
+templates = Jinja2Templates(directory="templates")
+
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
     data = {"data": "Disco API"}
-    return JSONResponse(data)
+    return templates.TemplateResponse("home.html", {"request": request, "title": "Title"})
+    # return JSONResponse(data)
 
 @app.get("/api/v0/get_list_conditions")
 def get_list_conditions():
@@ -48,16 +56,19 @@ def get_list_conditions():
 
     return return_data
 
-@app.get("/api/v0/get_treatment_for")
-def get_treatment_for(q: str = None):
+@app.get("/api/v0/get_treatment_for", response_class=HTMLResponse)
+def get_treatment_for(request: Request, q: str = None):
     return_data = {"data": []}
 
     callback = traverse_from_condition_until_drug.traverse_from_condition_until_drug(local_client, q)
     _ = add_blank_vertice.add_blank_vertice(local_client)
 
-    return_data["data"] = str(callback.result().all().result())
+    for item in callback.result().all().result():
+        return_data["data"].append(item["id"])
 
-    return return_data
+    # return return_data
+
+    return templates.TemplateResponse("response.html", {"request": request, "data": return_data})
 
 
 if __name__ == "__main__":
