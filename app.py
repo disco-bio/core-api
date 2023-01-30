@@ -11,6 +11,7 @@ from src import gremlin_list_conditions
 from src import add_blank_vertice
 from src import traverse_from_condition_until_drug
 from src import translate
+from src import quantum_bundle
 
 import dotenv
 import asyncio
@@ -31,6 +32,18 @@ if sys.platform == "win32":
 
 
 local_client = client.Client(GREMLIN_URI, "g", username=GREMLIN_USER, password=GREMLIN_PASSWORD, message_serializer=serializer.GraphSONSerializersV2d0())
+
+
+
+
+
+
+
+
+
+
+
+
 
 app = FastAPI()
 
@@ -69,7 +82,8 @@ def api_homepage_content(request: Request, lang: str=None):
 def api_results_content(request: Request, lang: str=None):
 
     content_dict = {
-            "title": "Search Results"
+            "title": "Search Results",
+            "quantumSubtitle": "Quantum-Based Recommendation: "
         }
 
 
@@ -101,15 +115,19 @@ def get_treatment_for(request: Request, q: str = None, lang: str=None):
     return templates.TemplateResponse("response.html", {"request": request, "q": q, "lang": lang})
 
 
+
 @app.get("/api/v0/get_data_for")
 def get_data_for(q: str = None):
-    return_data = {"data": []}
+    return_data = {"data": [], "quantumResult": None}
 
 
     callback = traverse_from_condition_until_drug.traverse_from_condition_until_drug(local_client, q)
-    _ = add_blank_vertice.add_blank_vertice(local_client)
 
-    for item in callback.result().all().result():
+    items = callback.result().all().result()
+
+    for item in items:
+
+        print(item)
 
         sub_dict = {
                 "drugName": None,
@@ -120,6 +138,22 @@ def get_data_for(q: str = None):
         sub_dict["pubmedUrl"] = f"https://pubmed.ncbi.nlm.nih.gov/?term={item['id']}"
 
         return_data["data"].append(sub_dict)
+
+
+    callback = traverse_from_condition_until_drug.list_results_path(local_client, q)
+
+    print(callback.result().all().result())
+
+    _ = add_blank_vertice.add_blank_vertice(local_client)
+
+
+    # insert 
+
+
+    res = quantum_bundle.compute_result(items)
+    print(res)
+
+    return_data["quantumResult"] = res
 
 
     return JSONResponse(return_data)
