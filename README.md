@@ -12,6 +12,24 @@ Build Azure Cosmos DB Gremlin database
 python -m scripts.init_codebase.build_gremlin
 ```
 
+The user needs to configure the following environment variables
+
+```
+MONGODB_URI=
+GREMLIN_URI=
+GREMLIN_USER=
+GREMLIN_PASSWORD=
+G=
+TRANSLATOR_KEY=
+TRANSLATOR_ENDPOINT=
+TRANSLATOR_LOCATION=
+QUANTUM_SUBSCRIPTION_ID=
+QUANTUM_NAME=
+QUANTUM_LOCATION=
+QUANTUM_RESOURCE_ID=
+QUANTUM_RESOURCE_GROUP=
+```
+
 Run web app
 
 ```
@@ -19,7 +37,3 @@ python app.py
 ```
 
 Go to `http://localhost:8080`.
-
-Code Reference:
-
-Blocks of code for quantum computing implementation were transcribed from the Azure Quantum quickstart for Python, as well as from the Qiskit textbook (https://qiskit.org/textbook/preface.html). However, the final structure of these code blocks and cost functions are my own work. 
