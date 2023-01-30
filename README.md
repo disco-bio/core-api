@@ -1,5 +1,9 @@
 # core-api
 
+Disco, by Laurence Liang
+
+2023 Microsoft Imagine World Cup, Semi Finals
+
 ### Quickstart
 
 Install dependencies
